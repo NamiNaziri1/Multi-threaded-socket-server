@@ -23,9 +23,9 @@ namespace Client
         {
             
 
-            master = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+            master = new Socket(AddressFamily.InterNetworkV6, SocketType.Stream, ProtocolType.Tcp);
 
-            IPEndPoint ipE = new IPEndPoint(IPAddress.Parse("127.0.0.1"), 12345);
+            IPEndPoint ipE = new IPEndPoint(IPAddress.Parse("fe80::8df6:2969:45f4:3946%10"), 12345);
 
 
             try{

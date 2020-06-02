@@ -69,6 +69,18 @@ namespace ServerData
 
             return "127.0.0.1";
         }
+
+        public static string GetIPV6Address()
+        {
+            IPAddress[] ips = Dns.GetHostAddresses(Dns.GetHostName());
+            foreach (IPAddress i in ips)
+            {
+                if (i.AddressFamily == System.Net.Sockets.AddressFamily.InterNetworkV6)
+                    return i.ToString();
+            }
+
+            return "127.0.0.1";
+        }
     }
 
 

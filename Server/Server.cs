@@ -20,12 +20,13 @@ namespace Server
         {
 
             //Console.WriteLine("Starting Server On " + Packet.GetIP4Address());
-            listenerSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+            listenerSocket = new Socket(AddressFamily.InterNetworkV6, SocketType.Stream, ProtocolType.Tcp);
             clients = new List<ClientData>();
-            IPEndPoint ip= new IPEndPoint(IPAddress.Parse("127.0.0.1"), 12345);
+            IPEndPoint ip= new IPEndPoint( IPAddress.Parse(Packet.GetIPV6Address()), 12345);
 
             listenerSocket.Bind(ip);
-
+            Console.WriteLine("Server IP: " + ip.Address.ToString());
+            Console.WriteLine("Server Port: " + ip.Port);
 
             Thread listenThread = new Thread(ListenThread);
             listenThread.Start();
@@ -38,6 +39,8 @@ namespace Server
         {
             while(true)
             {
+                
+     
                 listenerSocket.Listen(0);
 
                 
