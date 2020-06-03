@@ -72,18 +72,28 @@ namespace Client
                     {
                         p = new Packet(PacketType.firstNumber, id);
                         flag = false;
-                    }else
+                    }
+                    else
                     {
                         p = new Packet(PacketType.secondNumber, id);
                         flag = true;
                     }
-                    p.number = int.Parse(input);
-                    master.Send(p.ToBytes());
+
+                    if(input != "")
+                    {
+                        p.number = int.Parse(input);
+                        master.Send(p.ToBytes());
+                    }
+                    
                 }
                 catch (SocketException ex)
                 {
                     Console.WriteLine("Server has disconnected");
                     Console.ReadLine();
+                    Environment.Exit(0);
+                }
+                catch
+                {
                     Environment.Exit(0);
                 }
             }
@@ -95,13 +105,22 @@ namespace Client
             int readBytes;
             while(true)
             {
-                Buffer = new byte[master.SendBufferSize];
-                readBytes = master.Receive(Buffer);
-
-
-                if(readBytes > 0)
+                try
                 {
-                    DataManager(new Packet(Buffer));
+                    Buffer = new byte[master.SendBufferSize];
+                    readBytes = master.Receive(Buffer);
+
+
+                    if (readBytes > 0)
+                    {
+                        DataManager(new Packet(Buffer));
+                    }
+                }
+                catch(SocketException ex)
+                {
+                    Console.WriteLine(ex.Message);
+                    Console.ReadLine();
+                    Environment.Exit(0);
                 }
             }
         }
@@ -120,6 +139,12 @@ namespace Client
                 case PacketType.busy:
                     Console.ForegroundColor = ConsoleColor.Red;
                     Console.WriteLine("Server Is Busy");
+                    Console.ReadLine();
+                    Environment.Exit(0);
+                    break;
+                case PacketType.timeout:
+                    Console.ForegroundColor = ConsoleColor.Red;
+                    Console.WriteLine("You are timed out");
                     Console.ReadLine();
                     Environment.Exit(0);
                     break;

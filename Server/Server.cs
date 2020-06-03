@@ -29,6 +29,8 @@ namespace Server
             
             IPEndPoint ip= new IPEndPoint(IPAddress.Parse("127.0.0.1"), 12345);
             listenerSocket.Bind(ip);
+            
+
             Thread listenThread = new Thread(new ThreadStart(ListenThread));
             listenThread.Start();
 
@@ -69,8 +71,7 @@ namespace Server
                         Console.WriteLine("Client Accepted With port 12345");
                         Console.WriteLine("Number Of Current Client: " + clients.Count);
                     }
-                    
-                    
+  
                 }
 
             }
@@ -108,7 +109,8 @@ namespace Server
         {
             ClientData cd = (ClientData)ob;
             Socket clientSocket = cd.clientSocket;
-            
+
+            clientSocket.ReceiveTimeout = 10000;
             byte[] Buffer;
             int readBytes;
 
@@ -118,6 +120,7 @@ namespace Server
                 {
                     Buffer = new byte[clientSocket.SendBufferSize];
 
+                   
                     readBytes = clientSocket.Receive(Buffer);
 
                     if (readBytes > 0)
@@ -126,15 +129,31 @@ namespace Server
                         DataManager(packet, cd);
                     }
                 }
-                catch(SocketException ex)
+                catch (ObjectDisposedException e)
                 {
-                    
-                        
+                    Console.WriteLine("Caught: {0}", e.Message);
+                }
+                catch (SocketException ex)
+                {
 
-                    Console.WriteLine("A Client disconnected!");
-                    clientSocket.Close();
-                    clients.Remove(cd);
-                    Console.WriteLine("Number Of Current Client: " + clients.Count);
+                    if(ex.ErrorCode == 10060)
+                    {
+                        Console.WriteLine("Client timed out!");
+                        Packet p = new Packet(PacketType.timeout, "server");
+                        clientSocket.Send(p.ToBytes());
+                        clientSocket.Close();
+                        clients.Remove(cd);
+                        Console.WriteLine("Number Of Current Client: " + clients.Count);
+                    }
+                    else
+                    {
+                        Console.WriteLine(ex.ErrorCode);
+                        Console.WriteLine("A Client disconnected!");
+                        clientSocket.Close();
+                        clients.Remove(cd);
+                        Console.WriteLine("Number Of Current Client: " + clients.Count);
+                    }
+                    
 
                     break;
                 }
