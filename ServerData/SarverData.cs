@@ -78,6 +78,7 @@ namespace ServerData
         firstNumber,
         secondNumber,
         answer,
-        busy
+        busy,
+        timeout
     }
 }
