@@ -25,7 +25,7 @@ namespace Server
             IPEndPoint ip= new IPEndPoint(IPAddress.Parse("127.0.0.1"), 12345);
 
             listenerSocket.Bind(ip);
-
+            ///
 
             Thread listenThread = new Thread(ListenThread);
             listenThread.Start();
