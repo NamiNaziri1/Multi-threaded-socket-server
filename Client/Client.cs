@@ -25,10 +25,30 @@ namespace Client
 
             master = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
 
-            IPEndPoint ipE = new IPEndPoint(IPAddress.Parse("127.0.0.1"), 12345);
+            
 
 
-            try{
+            Console.WriteLine("Which Port Do You Want to use?");
+            Console.WriteLine("1.12345      2.12346");
+
+            int x = int.Parse(Console.ReadLine());
+            int port;
+            if(x == 1)
+            {
+                port = 12345;
+            }else if (x == 2)
+            {
+                port = 12346;
+            }
+            else
+            {
+                port = 12345;
+            }
+
+            IPEndPoint ipE = new IPEndPoint(IPAddress.Parse("127.0.0.1"), port);
+
+            try
+            {
                 master.Connect(ipE);
 
             }
@@ -94,8 +114,8 @@ namespace Client
                     ConsoleColor c = Console.ForegroundColor;
                     Console.ForegroundColor = ConsoleColor.Cyan;
                     Console.WriteLine(p.number);
-                    Console.Write(":: >");
                     Console.ForegroundColor = c;
+                    Console.Write(":: >");
                     break;
                 case PacketType.busy:
                     Console.ForegroundColor = ConsoleColor.Red;

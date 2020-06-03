@@ -7,6 +7,7 @@ using System.Net.Sockets;
 using System.IO;
 using System.Threading;
 using System.Net;
+using System.Diagnostics;
 
 namespace Server
 {
@@ -14,23 +15,33 @@ namespace Server
     {
 
         static Socket listenerSocket;
+        static Socket listenerSocket2;
         static List<ClientData> clients;
 
         static void Main(string[] args)
         {
-
-            //Console.WriteLine("Starting Server On " + Packet.GetIP4Address());
-            listenerSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
             clients = new List<ClientData>();
+
+
+            Console.WriteLine( Process.GetCurrentProcess().Threads.Count);
+            //initializing first socket
+            listenerSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+            
             IPEndPoint ip= new IPEndPoint(IPAddress.Parse("127.0.0.1"), 12345);
-
             listenerSocket.Bind(ip);
-            ///
-
-            Thread listenThread = new Thread(ListenThread);
+            Thread listenThread = new Thread(new ThreadStart(ListenThread));
             listenThread.Start();
 
 
+            //initializing second socket
+
+            listenerSocket2 = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+            IPEndPoint ip2 = new IPEndPoint(IPAddress.Parse("127.0.0.1"), 12346);
+            listenerSocket2.Bind(ip2);
+            Thread listenThread2 = new Thread(new ThreadStart(ListenThread2));
+            listenThread2.Start();
+
+            Console.WriteLine(Process.GetCurrentProcess().Threads.Count);
         }
 
 
@@ -40,25 +51,58 @@ namespace Server
             {
                 listenerSocket.Listen(0);
 
-                
 
+                Socket acc = listenerSocket.Accept();
                 if (clients.Count == 4)
                 {
                     Packet p = new Packet(PacketType.busy, "");
-                    Socket acc = listenerSocket.Accept();
+                    
                     acc.Send(p.ToBytes());
                     acc.Close();
                 }
                 else
                 {
-                    Console.WriteLine("Number Of Current Client: " + clients.Count);
-                    clients.Add(new ClientData(listenerSocket.Accept()));
+                    clients.Add(new ClientData(acc));
+                    if (clients.Count > 0)
+                    {
+                        
+                        Console.WriteLine("Client Accepted With port 12345");
+                        Console.WriteLine("Number Of Current Client: " + clients.Count);
+                    }
+                    
+                    
                 }
 
-                /////////////////////////
             }
         }
+        static void ListenThread2()
+        {
+            while (true)
+            {
+                listenerSocket2.Listen(0);
+                Socket acc = listenerSocket2.Accept();
+                if (clients.Count == 4)
+                {
+                    Packet p = new Packet(PacketType.busy, "");
+                    
+                    acc.Send(p.ToBytes());
+                    acc.Close();
+                }
+                else
+                {
+                    clients.Add(new ClientData(acc));
+                    if (clients.Count > 0)
+                    {
+                        
+                        Console.WriteLine("Client Accepted With port 12346");
+                        Console.WriteLine("Number Of Current Client: " + clients.Count);
+                    }
+                    
+                    
+                }
 
+            }
+        }
 
         public static void DataIN(object ob)
         {
